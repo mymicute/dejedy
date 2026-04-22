@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
-import { getStripe, DEPOSIT_AMOUNT } from '@/lib/stripe'
+import { DEPOSIT_AMOUNT } from '@/lib/stripe'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -310,8 +310,8 @@ function CheckoutContent() {
       </div>
     )
   }
-
-  const stripePromise = getStripe()
+const stripePromise = loadStripe
+(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
   const appearance = {
     theme: 'stripe' as const,
     variables: {
