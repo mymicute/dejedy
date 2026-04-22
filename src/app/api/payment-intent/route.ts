@@ -7,6 +7,11 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+type SubscriptionPrice = {
+  amount: number
+  name: string
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -21,7 +26,10 @@ export async function POST(req: NextRequest) {
 
     let amount: number
     let description: string
-    let metadata: Record<string, string> = { user_id: userId, type }
+    let metadata: Record<string, string> = {
+      user_id: userId,
+      type
+    }
 
     if (type === 'deposit') {
       if (!propertyId) {
@@ -38,23 +46,40 @@ export async function POST(req: NextRequest) {
         .single()
 
       if (!property) {
-        return NextResponse.json({ error: 'Property not found' }, { status: 404 })
+        return NextResponse.json(
+          { error: 'Property not found' },
+          { status: 404 }
+        )
       }
 
       amount = DEPOSIT_AMOUNT
       description = `Reservation deposit for: ${property.title}`
       metadata.property_id = propertyId
+
     } else if (type === 'subscription') {
-      const priceData = SUBSCRIPTION_PRICES[tier as keyof typeof SUBSCRIPTION_PRICES]
+
+      const priceData = SUBSCRIPTION_PRICES[tier as keyof typeof SUBSCRIPTION_PRICES] as SubscriptionPrice | undefined
+
       if (!priceData) {
-        return NextResponse.json({ error: 'Invalid subscription tier' }, { status: 400 })
+        return NextResponse.json(
+          { error: 'Invalid subscription tier' },
+          { status: 400 }
+        )
       }
+
       amount = priceData.amount
       description = `${priceData.name} - Promoted Listing`
       metadata.tier = tier
-      if (propertyId) metadata.property_id = propertyId
+
+      if (propertyId) {
+        metadata.property_id = propertyId
+      }
+
     } else {
-      return NextResponse.json({ error: 'Invalid payment type' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Invalid payment type' },
+        { status: 400 }
+      )
     }
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -85,8 +110,10 @@ export async function POST(req: NextRequest) {
       paymentIntentId: paymentIntent.id,
       amount,
     })
+
   } catch (error: any) {
     console.error('Payment intent error:', error)
+
     return NextResponse.json(
       { error: error.message || 'Failed to create payment intent' },
       { status: 500 }

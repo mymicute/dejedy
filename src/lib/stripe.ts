@@ -1,9 +1,10 @@
 import Stripe from "stripe"
-
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
-export const DEPOSIT_AMOUNT = 1000
-
+export type SubscriptionPrice = {
+  amount: number
+  name: string
+}
 export const SUBSCRIPTION_PRICES = {
-  basic: 1000,
-  premium: 5000,
+  basic: { amount: 1000, name: "Basic Plan" },
+  pro: { amount: 5000, name: "Pro Plan" },
+  premium: { amount: 10000, name: "Premium Plan" }
 }
