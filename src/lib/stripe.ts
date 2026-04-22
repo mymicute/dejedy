@@ -17,20 +17,32 @@ export const DEPOSIT_AMOUNT = 5000
 export const SUBSCRIPTION_PRICES = {
   basic: {
     amount: 1000,
-    name: 'Basic Plan',
+    name: "Basic Plan",
+    features: [
+      "1 Property Listing",
+      "Basic Visibility",
+      "Email Support"
+    ]
   },
   pro: {
     amount: 5000,
-    name: 'Pro Plan',
+    name: "Pro Plan",
+    features: [
+      "5 Property Listings",
+      "Featured Listing",
+      "Priority Support",
+      "Higher Visibility"
+    ]
   },
   premium: {
     amount: 10000,
-    name: 'Premium Plan',
-  },
+    name: "Premium Plan",
+    features: [
+      "Unlimited Listings",
+      "Top Featured Placement",
+      "24/7 Support",
+      "Maximum Visibility",
+      "Analytics Dashboard"
+    ]
+  }
 } as const
-
-import { loadStripe } from '@stripe/stripe-js'
-
-export const getStripe = () => {
-  return loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
-}
