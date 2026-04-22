@@ -212,54 +212,71 @@ function CheckoutContent() {
   const supabase = createClient()
 
   useEffect(() => {
-    const init = async () => {
-      if (!propertyId) {
-        setError('No property selected')
-        setLoading(false)
-        return
-      }
-
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push(`/auth?redirect=/checkout?propertyId=${propertyId}`)
-        return
-      }
-      setUserId(user.id)
-
-      const { data: prop } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('id', propertyId)
-        .single()
-
-      if (!prop) {
-        setError('Property not found')
-        setLoading(false)
-        return
-      }
-      setProperty(prop)
-
-      const res = await fetch('/api/payment-intent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'deposit', propertyId, userId: user.id }),
-      })
-
-      const data = await res.json()
-      if (data.error) {
-        setError(data.error)
-        setLoading(false)
-        return
-      }
-
-      setClientSecret(data.clientSecret)
-      setPaymentIntentId(data.paymentIntentId)
+  const init = async () => {
+    if (!propertyId) {
+      setError('No property selected')
       setLoading(false)
+      return
     }
 
-    init()
-  }, [propertyId, router, supabase])
+    const supabaseClient = createClient()
 
+    if (!supabaseClient) {
+      setError('Supabase client not initialized')
+      setLoading(false)
+      return
+    }
+
+    const { data: { user } } = await supabaseClient.auth.getUser()
+
+    if (!user) {
+      router.push(
+        `/auth?redirect=/checkout%3FpropertyId=${propertyId}`
+      )
+      return
+    }
+
+    setUserId(user.id)
+
+    const { data: prop, error: propError } = await supabaseClient
+      .from('properties')
+      .select('*')
+      .eq('id', propertyId)
+      .single()
+
+    if (propError || !prop) {
+      setError('Property not found')
+      setLoading(false)
+      return
+    }
+
+    setProperty(prop)
+
+    const res = await fetch('/api/payment-intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'deposit',
+        propertyId,
+        userId: user.id,
+      }),
+    })
+
+    const data = await res.json()
+
+    if (data.error) {
+      setError(data.error)
+      setLoading(false)
+      return
+    }
+
+    setClientSecret(data.clientSecret)
+    setPaymentIntentId(data.paymentIntentId)
+    setLoading(false)
+  }
+
+  init()
+}, [propertyId, router])
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-amber-50/30 to-orange-50/20 dark:from-black dark:via-zinc-900 dark:to-zinc-900 flex items-center justify-center">
