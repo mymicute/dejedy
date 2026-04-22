@@ -1,15 +1,11 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-  experimental: {
-    optimizeCss: false
-  }
-};
-
-export default nextConfig;
-const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
+  },
+  experimental: {
+    optimizeCss: false,
   },
 }
 
