@@ -1,5 +1,5 @@
 'use client'
-
+import { loadStripe } from '@stripe/stripe-js'
 import { useState, useEffect, Suspense } from 'react'
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { DEPOSIT_AMOUNT } from '@/lib/stripe'
